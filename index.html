@@ -873,11 +873,31 @@ googleLogin.addEventListener("click", () => {
 
 
 getRedirectResult(auth)
-.catch((error) => {
+  .then((result) => {
+    if (result && result.user) {
+      showUser(result.user);
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+  });
 
-  console.log(error);
-
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    showUser(user);
+  } else {
+    loginScreen.style.display = "flex";
+    accountBox.style.display = "none";
+  }
 });
+
+function showUser(user) {
+  userEmail.textContent = user.email || "";
+  userPhoto.src = user.photoURL || "";
+
+  loginScreen.style.display = "none";
+  accountBox.style.display = "flex";
+}
 
 
 onAuthStateChanged(auth, (user) => {
