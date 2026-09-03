@@ -1,139 +1,971 @@
-import { initializeApp } from
-  "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  onAuthStateChanged,
-  signOut
-} from
-  "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>FIRE</title>
 
-/* =================================
-   FIREBASE CONFIG
-================================= */
+  <style>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCo-dW-7JPzYtySL7MMR8cnwYb2TJU4tTo",
-  authDomain: "fire-cc972.firebaseapp.com",
-  projectId: "fire-cc972",
-  storageBucket: "fire-cc972.firebasestorage.app",
-  messagingSenderId: "69937265309",
-  appId: "1:69937265309:web:48e8e35eb42b1963dd3274",
-  measurementId: "G-649ZY591NR"
-};
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", sans-serif;
+      background: #f5f1ea;
+      color: #171717;
+      overflow-x: hidden;
+    }
 
 
-/* =================================
-   INITIALIZE FIREBASE
-================================= */
+    /* =========================
+       HEADER
+    ========================= */
 
-const app = initializeApp(firebaseConfig);
+    header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 35px 20px 15px;
+    }
 
-const auth = getAuth(app);
+    .logo {
+      font-family: Impact, sans-serif;
+      font-size: clamp(55px, 10vw, 120px);
+      letter-spacing: 10px;
+      margin: 0;
+      color: #ff4b00;
+      -webkit-text-stroke: 3px #161616;
+      text-shadow:
+        3px 3px 0 #ff9d00,
+        6px 6px 0 rgba(0,0,0,.12);
+    }
 
-const provider = new GoogleAuthProvider();
-
-
-/* =================================
-   GET WEBSITE ELEMENTS
-================================= */
-
-const loginScreen = document.getElementById("loginScreen");
-
-const accountBox = document.getElementById("accountBox");
-
-const googleLogin = document.getElementById("googleLogin");
-
-const userEmail = document.getElementById("userEmail");
-
-const userPhoto = document.getElementById("userPhoto");
-
-
-/* =================================
-   GOOGLE LOGIN BUTTON
-================================= */
-
-googleLogin.addEventListener("click", () => {
-
-  signInWithRedirect(auth, provider)
-    .catch((error) => {
-
-      console.error("Google login error:", error);
-
-    });
-
-});
+    .subtitle {
+      margin-top: 5px;
+      font-size: 18px;
+      opacity: .65;
+    }
 
 
-/* =================================
-   HANDLE REDIRECT RESULT
-================================= */
+    /* =========================
+       SEARCH
+    ========================= */
 
-getRedirectResult(auth)
-  .then((result) => {
+    .search-area {
+      width: min(850px, 90%);
+      margin: 25px auto 30px;
+    }
 
-    if (result && result.user) {
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 4px solid #1a1a1a;
+      border-radius: 60px;
+      padding: 8px;
+      box-shadow: 7px 7px 0 rgba(0,0,0,.12);
+    }
 
-      showUser(result.user);
+    .search-icon {
+      font-size: 30px;
+      margin: 0 15px;
+    }
+
+    #searchInput {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 22px;
+      font-family: inherit;
+      padding: 12px 5px;
+      background: transparent;
+    }
+
+    #searchButton {
+      border: 3px solid #151515;
+      background: #ff6a00;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      padding: 12px 22px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    #searchButton:hover {
+      transform: rotate(-2deg) scale(1.05);
+    }
+
+
+    /* =========================
+       NAVIGATION
+    ========================= */
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      padding: 15px 20px 40px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .nav button {
+      border: 4px solid #171717;
+      background: white;
+      border-radius: 30px;
+      padding: 12px 25px;
+      font-family: inherit;
+      font-size: 19px;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 #171717;
+      transition: .15s;
+    }
+
+    .nav button:hover {
+      background: #ffd55c;
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0 #171717;
+    }
+
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    main {
+      width: min(1100px, 92%);
+      margin: auto;
+      padding-bottom: 150px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .page {
+      display: none;
+      animation: pop .35s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes pop {
+
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
 
     }
 
-  })
-  .catch((error) => {
-
-    console.error("Redirect error:", error);
-
-  });
-
-
-/* =================================
-   CHECK IF USER IS ALREADY LOGGED IN
-================================= */
-
-onAuthStateChanged(auth, (user) => {
-
-  if (user) {
-
-    showUser(user);
-
-  } else {
-
-    loginScreen.style.display = "flex";
-
-    accountBox.style.display = "none";
-
-  }
-
-});
+    .section-title {
+      text-align: center;
+      font-size: 42px;
+      margin: 10px 0 30px;
+      transform: rotate(-1deg);
+    }
 
 
-/* =================================
-   SHOW LOGGED-IN USER
-================================= */
+    /* =========================
+       CARDS
+    ========================= */
 
-function showUser(user) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+    }
 
-  userEmail.textContent = user.email || "";
+    .card {
+      background: white;
+      border: 4px solid #171717;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 8px 8px 0 #171717;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-  if (user.photoURL) {
+    .card:hover {
+      transform: rotate(-1deg) translateY(-5px);
+    }
 
-    userPhoto.src = user.photoURL;
+    .card-icon {
+      font-size: 60px;
+    }
 
-    userPhoto.style.display = "block";
+    .card h3 {
+      font-size: 25px;
+      margin: 12px 0 5px;
+    }
 
-  } else {
+    .card p {
+      opacity: .7;
+    }
 
-    userPhoto.style.display = "none";
+    .card a,
+    .card button {
+      text-decoration: none;
+      text-align: center;
+      border: 3px solid #171717;
+      background: #ff6a00;
+      color: white;
+      padding: 10px;
+      border-radius: 14px;
+      font-weight: bold;
+      font-family: inherit;
+      cursor: pointer;
+    }
 
-  }
+
+    /* =========================
+       FAVORITES
+    ========================= */
+
+    .favorite-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+      justify-content: center;
+    }
+
+    .favorite-form input {
+      padding: 14px;
+      border: 3px solid #171717;
+      border-radius: 15px;
+      font-family: inherit;
+      font-size: 16px;
+      min-width: 220px;
+    }
+
+    .favorite-form button {
+      padding: 14px 20px;
+      border: 3px solid #171717;
+      background: #ff6a00;
+      color: white;
+      border-radius: 15px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .favorite-item {
+      background: white;
+      border: 3px solid #171717;
+      padding: 15px;
+      border-radius: 15px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .favorite-item a {
+      color: #111;
+      font-weight: bold;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .delete-button {
+      border: 2px solid #171717;
+      background: #ff4b00;
+      color: white;
+      border-radius: 10px;
+      padding: 7px 12px;
+      cursor: pointer;
+    }
 
 
-  loginScreen.style.display = "none";
+    /* =========================
+       MUSIC
+    ========================= */
 
-  accountBox.style.display = "flex";
+    .music-player {
+      max-width: 650px;
+      margin: auto;
+      background: white;
+      border: 4px solid #171717;
+      border-radius: 25px;
+      padding: 25px;
+      box-shadow: 10px 10px 0 #171717;
+      text-align: center;
+    }
 
-}
+    .album-art {
+      width: 230px;
+      height: 230px;
+      margin: 10px auto 20px;
+      border: 4px solid #171717;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 30% 30%, #ffd000, #ff6500 35%, #e81700 65%, #171717 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 100px;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        transform: rotate(-2deg);
+      }
+
+      to {
+        transform: rotate(2deg) scale(1.03);
+      }
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .music-note {
+      font-size: 20px;
+      opacity: .7;
+    }
+
+
+    /* =========================
+       FIRE
+    ========================= */
+
+    .fire-ground {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: -40px;
+      width: 90px;
+      height: 170px;
+      background: linear-gradient(
+        to top,
+        #ffd000 0%,
+        #ff9400 35%,
+        #ff3c00 70%,
+        #c90000 100%
+      );
+      border: 4px solid #171717;
+      border-radius: 60% 40% 55% 45%;
+      transform-origin: bottom;
+      animation: fireMove 1.2s infinite alternate ease-in-out;
+    }
+
+    .flame::after {
+      content: "";
+      position: absolute;
+      width: 40px;
+      height: 85px;
+      background: #ffcf00;
+      border-radius: 60% 40% 60% 40%;
+      bottom: 15px;
+      left: 25px;
+      opacity: .9;
+    }
+
+    @keyframes fireMove {
+
+      0% {
+        transform: rotate(-6deg) scaleY(.9);
+      }
+
+      100% {
+        transform: rotate(6deg) scaleY(1.12);
+      }
+
+    }
+
+    .f1 { left: -10px; height: 180px; }
+    .f2 { left: 10%; height: 120px; animation-delay: .2s; }
+    .f3 { left: 22%; height: 190px; animation-delay: .5s; }
+    .f4 { left: 37%; height: 130px; animation-delay: .1s; }
+    .f5 { left: 50%; height: 180px; animation-delay: .4s; }
+    .f6 { left: 65%; height: 140px; animation-delay: .7s; }
+    .f7 { left: 78%; height: 190px; animation-delay: .3s; }
+    .f8 { left: 92%; height: 150px; animation-delay: .6s; }
+
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 600px) {
+
+      .search-box {
+        flex-wrap: wrap;
+        border-radius: 25px;
+      }
+
+      #searchInput {
+        font-size: 18px;
+      }
+
+      #searchButton {
+        width: 100%;
+      }
+
+      .logo {
+        letter-spacing: 5px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <!-- HEADER -->
+
+  <header>
+
+    <h1 class="logo">🔥 FIRE 🔥</h1>
+
+    <div class="subtitle">
+      Search • Watch • Play • Save • Listen
+    </div>
+
+  </header>
+
+
+
+  <!-- SEARCH -->
+
+  <div class="search-area">
+
+    <div class="search-box">
+
+      <div class="search-icon">🔍</div>
+
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search the web..."
+      >
+
+      <button id="searchButton">
+        Search
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- NAV -->
+
+  <nav class="nav">
+
+    <button onclick="showPage('videos')">
+      ▶ Videos
+    </button>
+
+    <button onclick="showPage('games')">
+      🎮 Games
+    </button>
+
+    <button onclick="showPage('favorites')">
+      ❤️ Favorites
+    </button>
+
+    <button onclick="showPage('music')">
+      🎵 Music
+    </button>
+
+  </nav>
+
+
+
+  <main>
+
+
+    <!-- VIDEOS -->
+
+    <section id="videos" class="page active">
+
+      <h2 class="section-title">
+        ▶ Videos
+      </h2>
+
+      <div class="cards">
+
+        <div class="card">
+
+          <div class="card-icon">▶️</div>
+
+          <div>
+            <h3>YouTube</h3>
+            <p>Watch videos, creators, music and more.</p>
+          </div>
+
+          <a href="https://www.youtube.com/" target="_blank">
+            Open YouTube
+          </a>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-icon">🎬</div>
+
+          <div>
+            <h3>Short Videos</h3>
+            <p>Jump straight into YouTube Shorts.</p>
+          </div>
+
+          <a href="https://www.youtube.com/shorts/" target="_blank">
+            Watch Shorts
+          </a>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-icon">📺</div>
+
+          <div>
+            <h3>Trending</h3>
+            <p>Discover what's popular right now.</p>
+          </div>
+
+          <a href="https://www.youtube.com/feed/trending" target="_blank">
+            See Trending
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- GAMES -->
+
+    <section id="games" class="page">
+
+      <h2 class="section-title">
+        🎮 Games
+      </h2>
+
+      <div class="cards">
+
+        <div class="card">
+
+          <div class="card-icon">🎮</div>
+
+          <div>
+            <h3>CrazyGames</h3>
+            <p>Play hundreds of browser games.</p>
+          </div>
+
+          <a href="https://www.crazygames.com/" target="_blank">
+            Play
+          </a>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-icon">🕹️</div>
+
+          <div>
+            <h3>Poki</h3>
+            <p>Quick browser games and popular classics.</p>
+          </div>
+
+          <a href="https://poki.com/" target="_blank">
+            Play
+          </a>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-icon">♟️</div>
+
+          <div>
+            <h3>Chess</h3>
+            <p>Play chess online.</p>
+          </div>
+
+          <a href="https://www.chess.com/play" target="_blank">
+            Play Chess
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- FAVORITES -->
+
+    <section id="favorites" class="page">
+
+      <h2 class="section-title">
+        ❤️ Favorites
+      </h2>
+
+
+      <div class="favorite-form">
+
+        <input
+          id="favoriteName"
+          placeholder="Name"
+        >
+
+        <input
+          id="favoriteLink"
+          placeholder="https://example.com"
+        >
+
+        <button onclick="addFavorite()">
+          Add Favorite
+        </button>
+
+      </div>
+
+
+      <div id="favoritesList"></div>
+
+    </section>
+
+
+
+    <!-- MUSIC -->
+
+    <section id="music" class="page">
+
+      <h2 class="section-title">
+        🎵 Album Player
+      </h2>
+
+
+      <div class="music-player">
+
+        <div class="album-art">
+          🔥
+        </div>
+
+        <h2>FIRE PLAYER</h2>
+
+        <div class="music-note">
+          Add your own audio file URL to customize this player.
+        </div>
+
+
+        <audio controls>
+
+          Your browser does not support audio.
+
+        </audio>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+
+
+  <!-- ANIMATED FIRE -->
+
+  <div class="fire-ground">
+
+    <div class="flame f1"></div>
+    <div class="flame f2"></div>
+    <div class="flame f3"></div>
+    <div class="flame f4"></div>
+    <div class="flame f5"></div>
+    <div class="flame f6"></div>
+    <div class="flame f7"></div>
+    <div class="flame f8"></div>
+
+  </div>
+
+
+
+  <script>
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    function searchWeb() {
+
+      const searchInput =
+        document.getElementById("searchInput");
+
+      const query =
+        searchInput.value.trim();
+
+      if (query !== "") {
+
+        window.open(
+          "https://www.google.com/search?q=" +
+          encodeURIComponent(query),
+          "_blank"
+        );
+
+      }
+
+    }
+
+
+    document
+      .getElementById("searchButton")
+      .addEventListener("click", searchWeb);
+
+
+    document
+      .getElementById("searchInput")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+
+          searchWeb();
+
+        }
+
+      });
+
+
+
+    /* =========================
+       PAGES
+    ========================= */
+
+    function showPage(pageName) {
+
+      const pages =
+        document.querySelectorAll(".page");
+
+      pages.forEach(function(page) {
+
+        page.classList.remove("active");
+
+      });
+
+
+      document
+        .getElementById(pageName)
+        .classList.add("active");
+
+
+      window.scrollTo({
+
+        top: 0,
+        behavior: "smooth"
+
+      });
+
+    }
+
+
+
+    /* =========================
+       FAVORITES
+    ========================= */
+
+    function getFavorites() {
+
+      return JSON.parse(
+        localStorage.getItem("fireFavorites")
+      ) || [];
+
+    }
+
+
+    function saveFavorites(favorites) {
+
+      localStorage.setItem(
+        "fireFavorites",
+        JSON.stringify(favorites)
+      );
+
+    }
+
+
+    function addFavorite() {
+
+      const nameInput =
+        document.getElementById("favoriteName");
+
+      const linkInput =
+        document.getElementById("favoriteLink");
+
+
+      const name =
+        nameInput.value.trim();
+
+      let link =
+        linkInput.value.trim();
+
+
+      if (!name || !link) {
+
+        alert("Enter a name and link.");
+
+        return;
+
+      }
+
+
+      if (
+        !link.startsWith("http://") &&
+        !link.startsWith("https://")
+      ) {
+
+        link = "https://" + link;
+
+      }
+
+
+      const favorites =
+        getFavorites();
+
+
+      favorites.push({
+
+        name: name,
+        link: link
+
+      });
+
+
+      saveFavorites(favorites);
+
+
+      nameInput.value = "";
+      linkInput.value = "";
+
+
+      renderFavorites();
+
+    }
+
+
+
+    function deleteFavorite(index) {
+
+      const favorites =
+        getFavorites();
+
+
+      favorites.splice(index, 1);
+
+
+      saveFavorites(favorites);
+
+
+      renderFavorites();
+
+    }
+
+
+
+    function renderFavorites() {
+
+      const favorites =
+        getFavorites();
+
+
+      const list =
+        document.getElementById("favoritesList");
+
+
+      list.innerHTML = "";
+
+
+      if (favorites.length === 0) {
+
+        list.innerHTML =
+          "<p style='text-align:center;'>No favorites yet. Add one above! 🔥</p>";
+
+        return;
+
+      }
+
+
+      favorites.forEach(function(favorite, index) {
+
+        const item =
+          document.createElement("div");
+
+
+        item.className =
+          "favorite-item";
+
+
+        item.innerHTML = `
+
+          <a
+            href="${favorite.link}"
+            target="_blank"
+          >
+            ❤️ ${favorite.name}
+          </a>
+
+          <button
+            class="delete-button"
+            onclick="deleteFavorite(${index})"
+          >
+            Delete
+          </button>
+
+        `;
+
+
+        list.appendChild(item);
+
+      });
+
+    }
+
+
+    renderFavorites();
+
+  </script>
+
+
+</body>
+</html>
